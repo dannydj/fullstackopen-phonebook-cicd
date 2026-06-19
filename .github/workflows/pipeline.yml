@@ -1,0 +1,55 @@
+name: Deployment pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+
+permissions:
+  contents: write
+
+jobs:
+  simple_deployment_pipeline:
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+      SECRET: test-secret
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check style
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test --if-present
+
+      - name: Build frontend
+        run: npm run build:ui
+
+  deploy:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+    needs:
+      - simple_deployment_pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger deployment
+        run: curl --fail-with-body "${{ secrets.RENDER_DEPLOY_HOOK }}"
