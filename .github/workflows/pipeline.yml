@@ -1,4 +1,4 @@
-name: Deployment pipeline
+name: Phonebook deployment pipeline
 
 on:
   push:
@@ -11,18 +11,9 @@ on:
       - opened
       - synchronize
 
-permissions:
-  contents: write
-
 jobs:
-  simple_deployment_pipeline:
+  phonebook_pipeline:
     runs-on: ubuntu-latest
-
-    env:
-      NODE_ENV: test
-      MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
-      SECRET: test-secret
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -32,24 +23,18 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm install
 
       - name: Check style
-        run: npm run lint --if-present
+        run: npm run lint
 
       - name: Test
-        run: npm test --if-present
+        run: npm test
 
       - name: Build frontend
-        run: npm run build:ui
+        run: npm run build
 
-  deploy:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
-    needs:
-      - simple_deployment_pipeline
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Trigger deployment
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
         run: curl --fail-with-body "${{ secrets.RENDER_DEPLOY_HOOK }}"
