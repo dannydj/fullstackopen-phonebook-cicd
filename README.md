@@ -188,7 +188,7 @@ npm run lint
 Deployed application:
 
 ```txt
-TBD
+https://fullstackopen-phonebook-cicd.onrender.com
 ```
 
 The deployment is handled through Render and GitHub Actions.
