@@ -210,3 +210,7 @@ This project is based on:
 * Full Stack Open - Part 2: Communicating with server
 * Full Stack Open - Part 3: Programming a server with NodeJS and Express
 * Full Stack Open - Part 11: Continuous Integration / Continuous Deployment
+
+## Branch protection
+
+The main branch is protected and requires a pull request review before merging.
